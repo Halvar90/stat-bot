@@ -1,0 +1,212 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Statistics Model
+model User {
+  id          String   @id @default(cuid())
+  discordId   String   @unique
+  username    String
+  discriminator String?
+  avatar      String?
+  joinedAt    DateTime @default(now())
+  lastActive  DateTime @default(now())
+  
+  // Statistics
+  messageCount    Int @default(0)
+  reactionCount   Int @default(0)
+  voiceMinutes    Int @default(0)
+  
+  // Relations
+  messages        Message[]
+  reactions       Reaction[]
+  voiceSessions   VoiceSession[]
+  userRoles       UserRole[]
+  moderationLogs  ModerationLog[]
+  
+  @@map("users")
+}
+
+// Guild Configuration
+model Guild {
+  id          String   @id
+  name        String
+  ownerId     String
+  joinedAt    DateTime @default(now())
+  
+  // Configuration
+  statisticsEnabled Boolean @default(true)
+  autoRoleEnabled   Boolean @default(false)
+  welcomeChannelId  String?
+  logChannelId      String?
+  
+  // Relations
+  channels        Channel[]
+  roles           Role[]
+  messages        Message[]
+  reactions       Reaction[]
+  voiceSessions   VoiceSession[]
+  userRoles       UserRole[]
+  roleRules       RoleRule[]
+  moderationLogs  ModerationLog[]
+  
+  @@map("guilds")
+}
+
+// Channel Information
+model Channel {
+  id        String   @id
+  name      String
+  type      String
+  guildId   String
+  createdAt DateTime @default(now())
+  
+  // Relations
+  guild     Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  voiceSessions VoiceSession[]
+  
+  @@map("channels")
+}
+
+// Role Information
+model Role {
+  id        String   @id
+  name      String
+  color     String?
+  position  Int
+  guildId   String
+  createdAt DateTime @default(now())
+  
+  // Relations
+  guild     Guild      @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  userRoles UserRole[]
+  roleRules RoleRule[]
+  
+  @@map("roles")
+}
+
+// User Role Assignment
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  guildId   String
+  assignedAt DateTime @default(now())
+  assignedBy String? // User ID who assigned the role
+  reason    String?
+  
+  // Relations
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role    Role  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  guild   Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, roleId, guildId])
+  @@map("user_roles")
+}
+
+// Message Statistics
+model Message {
+  id        String   @id
+  content   String?
+  authorId  String
+  channelId String
+  guildId   String
+  createdAt DateTime @default(now())
+  editedAt  DateTime?
+  deleted   Boolean  @default(false)
+  deletedAt DateTime?
+  
+  // Relations
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  channel   Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  guild     Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  reactions Reaction[]
+  
+  @@map("messages")
+}
+
+// Reaction Statistics
+model Reaction {
+  id        String   @id @default(cuid())
+  emoji     String
+  messageId String
+  userId    String
+  guildId   String
+  createdAt DateTime @default(now())
+  
+  // Relations
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guild   Guild   @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  
+  @@unique([messageId, userId, emoji])
+  @@map("reactions")
+}
+
+// Voice Session Tracking
+model VoiceSession {
+  id        String   @id @default(cuid())
+  userId    String
+  channelId String
+  guildId   String
+  joinedAt  DateTime @default(now())
+  leftAt    DateTime?
+  duration  Int?     // Duration in minutes
+  
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  guild   Guild   @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  
+  @@map("voice_sessions")
+}
+
+// Role Assignment Rules
+model RoleRule {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  guildId     String
+  roleId      String
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  // Rule Conditions
+  minMessages    Int?
+  minReactions   Int?
+  minVoiceMinutes Int?
+  daysPeriod     Int?    // Period to check (e.g., last 30 days)
+  
+  // Relations
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  role  Role  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  @@map("role_rules")
+}
+
+// Moderation Logs
+model ModerationLog {
+  id        String   @id @default(cuid())
+  action    String   // kick, ban, mute, warn, etc.
+  targetId  String   // User ID of the target
+  moderatorId String // User ID of the moderator
+  guildId   String
+  reason    String?
+  duration  Int?     // Duration in minutes for temporary actions
+  createdAt DateTime @default(now())
+  
+  // Relations
+  target    User  @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  guild     Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  
+  @@map("moderation_logs")
+}

@@ -5,14 +5,26 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node index.js"
+    "dev": "node index.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "build": "npm run db:generate"
   },
   "keywords": ["discord", "bot", "statistics", "moderation", "roles"],
   "author": "Halvar90",
   "license": "MIT",
   "dependencies": {
     "discord.js": "^14.15.3",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "pg": "^8.12.0",
+    "redis": "^4.7.0",
+    "prisma": "^5.18.0",
+    "@prisma/client": "^5.18.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.18.0"
   },
   "engines": {
     "node": ">=18.0.0"
