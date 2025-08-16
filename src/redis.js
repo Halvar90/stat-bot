@@ -8,7 +8,7 @@ class RedisManager {
 
     async connect() {
         try {
-            const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+            const redisUrl = process.env.REDIS_PUBLIC_URL || process.env.REDIS_URL || 'redis://localhost:6379';
             
             this.client = createClient({
                 url: redisUrl,

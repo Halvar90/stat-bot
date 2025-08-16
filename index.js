@@ -152,7 +152,7 @@ console.log(`- NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
 console.log(`- DISCORD_TOKEN: ${process.env.DISCORD_TOKEN ? 'Gesetzt ✅' : 'Nicht gesetzt ❌'}`);
 console.log(`- DISCORD_CLIENT_ID: ${process.env.DISCORD_CLIENT_ID || 'Nicht gesetzt ❌'}`);
 console.log(`- DATABASE_URL: ${process.env.DATABASE_URL ? 'Gesetzt ✅' : 'Nicht gesetzt ❌'}`);
-console.log(`- REDIS_URL: ${process.env.REDIS_URL ? 'Gesetzt ✅' : 'Nicht gesetzt ❌'}`);
+console.log(`- REDIS_URL: ${process.env.REDIS_PUBLIC_URL || process.env.REDIS_URL ? 'Gesetzt ✅' : 'Nicht gesetzt ❌'}`);
 
 // Graceful Shutdown
 process.on('SIGINT', async () => {
