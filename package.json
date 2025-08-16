@@ -1,0 +1,20 @@
+{
+  "name": "stat-bot",
+  "version": "1.0.0",
+  "description": "Umfassender Discord Statistik Bot für Benutzer- und Moderator-Aktivitäten",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "keywords": ["discord", "bot", "statistics", "moderation", "roles"],
+  "author": "Halvar90",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
